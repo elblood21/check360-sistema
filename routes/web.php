@@ -81,6 +81,7 @@ Route::middleware(['subdominio.auth'])->group(function() {
             Route::get('/editar/{id}', [MisteryShopperController::class, 'edit'])->name('shoppers.editar');
             Route::post('/update', [MisteryShopperController::class, 'update'])->name('shoppers.update');
             Route::post('/eliminar', [MisteryShopperController::class, 'eliminar'])->name('shoppers.eliminar');
+            Route::post('/activar', [MisteryShopperController::class, 'activar'])->name('shoppers.activar');
             Route::post('/aprobar', [MisteryShopperController::class, 'aprobar'])->name('shoppers.aprobar');
             Route::post('/rechazar', [MisteryShopperController::class, 'rechazar'])->name('shoppers.rechazar');
         });
