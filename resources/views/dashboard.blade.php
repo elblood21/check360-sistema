@@ -778,20 +778,11 @@
                             <form id="agendar-visita-form">
                                 @csrf
                                 <input type="hidden" name="restaurante_id_modal" id="restaurante_id_modal">
-                                
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label small fw-bold">Fecha de Visita (*)</label>
-                                        <input type="date" name="fecha_visita" id="fecha_visita" class="form-control" required min="{{ date('Y-m-d') }}">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label small fw-bold">Hora aproximada de llegada (*)</label>
-                                        <input type="time" name="hora_visita" id="hora_visita" class="form-control" required>
-                                    </div>
-                                </div>
+                                <input type="hidden" name="fecha_visita" id="fecha_visita_dashboard_hidden">
+                                <input type="hidden" name="hora_visita" id="hora_visita_dashboard_hidden">
 
                                 <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 0.5rem;" id="btn-reservar">
-                                    <i class="icofont icofont-check-circled"></i> Confirmar Agendamiento y Responder Pre-Encuesta
+                                    <i class="icofont icofont-check-circled"></i> Agendar visita
                                 </button>
                             </form>
                         </div>
@@ -1487,6 +1478,17 @@
         $('#agendar-visita-form').submit(function(e) {
             e.preventDefault();
 
+            // Populate current date and time
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            $('#fecha_visita_dashboard_hidden').val(`${year}-${month}-${day}`);
+            $('#hora_visita_dashboard_hidden').val(`${hours}:${minutes}`);
+
             var btn = $('#btn-reservar');
             btn.prop('disabled', true).text('Procesando agendamiento...');
 
@@ -1502,12 +1504,12 @@
                             window.location.href = res.url;
                         }, 2000);
                     } else {
-                        btn.prop('disabled', false).text('Confirmar Agendamiento y Responder Pre-Encuesta');
+                        btn.prop('disabled', false).text('Agendar visita');
                         notify('Error al agendar', res.mensaje || 'Ocurrió un error', 'danger');
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).text('Confirmar Agendamiento y Responder Pre-Encuesta');
+                    btn.prop('disabled', false).text('Agendar visita');
                     var msg = 'Ocurrió un error al agendar la visita.';
                     if (xhr.responseJSON && xhr.responseJSON.mensaje) {
                         msg = xhr.responseJSON.mensaje;

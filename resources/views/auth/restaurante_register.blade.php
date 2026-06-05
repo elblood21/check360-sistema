@@ -997,16 +997,156 @@
             }
         });
 
+        function validarPaso1() {
+            var nombre = $('#nombre').val();
+            if(!nombre || nombre.trim() === '') {
+                notify('Atención', 'Debe ingresar el nombre del restaurante', 'warning');
+                $('#nombre').focus();
+                return false;
+            }
+
+            var desc = parseInt($('#porcentaje_descuento').val());
+            if(isNaN(desc) || desc < 50 || desc > 100) {
+                notify('Atención', 'El descuento de Mystery Shopper debe estar entre 50% y 100%', 'warning');
+                $('#porcentaje_descuento').focus();
+                return false;
+            }
+
+            if(!$('#region_id').val()) {
+                notify('Atención', 'Debe seleccionar una región', 'warning');
+                return false;
+            }
+
+            if(!$('#ciudad_id').val()) {
+                notify('Atención', 'Debe seleccionar una ciudad/comuna', 'warning');
+                return false;
+            }
+
+            var direccion = $('#direccion').val();
+            if(!direccion || direccion.trim() === '') {
+                notify('Atención', 'Debe ingresar la dirección del restaurante', 'warning');
+                $('#direccion').focus();
+                return false;
+            }
+
+            if(dzLocal.getAcceptedFiles().length === 0) {
+                notify('Atención', 'Debes subir al menos 1 imagen real del local', 'warning');
+                return false;
+            }
+
+            var adminName = $('#admin_name').val();
+            if(!adminName || adminName.trim() === '') {
+                notify('Atención', 'Debe ingresar el nombre del administrador', 'warning');
+                $('#admin_name').focus();
+                return false;
+            }
+
+            var adminEmail = $('#admin_email').val();
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!adminEmail || !emailRegex.test(adminEmail.trim())) {
+                notify('Atención', 'Debe ingresar un correo electrónico válido para el administrador', 'warning');
+                $('#admin_email').focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function validarPaso2() {
+            var cartaTipo = $('#carta_tipo').val();
+            if (cartaTipo === 'imagenes') {
+                if (dzCarta.getAcceptedFiles().length === 0) {
+                    notify('Atención', 'Debes subir al menos 1 imagen de la carta', 'warning');
+                    return false;
+                }
+            } else if (cartaTipo === 'url') {
+                var cartaUrl = $('#carta_url').val();
+                if (!cartaUrl || cartaUrl.trim() === '') {
+                    notify('Atención', 'Debe ingresar la URL de la carta digital', 'warning');
+                    $('#carta_url').focus();
+                    return false;
+                }
+                if (!cartaUrl.trim().toLowerCase().startsWith('http://') && !cartaUrl.trim().toLowerCase().startsWith('https://')) {
+                    notify('Atención', 'La URL de la carta debe comenzar con http:// o https://', 'warning');
+                    $('#carta_url').focus();
+                    return false;
+                }
+            }
+
+            var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+            var diasLabels = {
+                lunes: 'Lunes',
+                martes: 'Martes',
+                miercoles: 'Miércoles',
+                jueves: 'Jueves',
+                viernes: 'Viernes',
+                sabado: 'Sábado',
+                domingo: 'Domingo'
+            };
+
+            for (var i = 0; i < dias.length; i++) {
+                var dia = dias[i];
+                var apertura = $('#apertura_' + dia).val();
+                var cierre = $('#cierre_' + dia).val();
+
+                if ((apertura && !cierre) || (!apertura && cierre)) {
+                    notify('Atención', 'Debe completar tanto el horario de apertura como de cierre para el día ' + diasLabels[dia], 'warning');
+                    if (!apertura) $('#apertura_' + dia).focus();
+                    else $('#cierre_' + dia).focus();
+                    return false;
+                }
+
+                if (apertura && cierre) {
+                    var peakVal = $('#peak_select_' + dia).val();
+                    if (!peakVal || peakVal.trim() === '') {
+                        notify('Atención', 'Debe seleccionar el horario peak para el día ' + diasLabels[dia], 'warning');
+                        $('#peak_select_' + dia).focus();
+                        return false;
+                    }
+                }
+            }
+
+            if ($('#protocolos_si').is(':checked')) {
+                var protDetalle = $('#protocolos_internos_detalle').val();
+                if (!protDetalle || protDetalle.trim() === '') {
+                    notify('Atención', 'Debe detallar los protocolos internos requeridos', 'warning');
+                    $('#protocolos_internos_detalle').focus();
+                    return false;
+                }
+            }
+
+            if (choicesInstances['motivos_visita_restaurante']) {
+                var motivosVal = choicesInstances['motivos_visita_restaurante'].getValue(true) || [];
+                if (motivosVal.includes('Otros')) {
+                    var motivosOtros = $('#motivos_visita_restaurante_otros').val();
+                    if (!motivosOtros || motivosOtros.trim() === '') {
+                        notify('Atención', 'Debe detallar el otro motivo de visita seleccionado', 'warning');
+                        $('#motivos_visita_restaurante_otros').focus();
+                        return false;
+                    }
+                }
+            }
+
+            if (choicesInstances['puntos_fuertes']) {
+                var puntosVal = choicesInstances['puntos_fuertes'].getValue(true) || [];
+                if (puntosVal.includes('Otros')) {
+                    var puntosOtros = $('#puntos_fuertes_otros').val();
+                    if (!puntosOtros || puntosOtros.trim() === '') {
+                        notify('Atención', 'Debe detallar los otros puntos fuertes seleccionados', 'warning');
+                        $('#puntos_fuertes_otros').focus();
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         // Wizard Navigation
         $('#btn-next').click(function() {
             // Validate Step 1
-            if(!$('#nombre').val()) { notify('Atención', 'Falta el nombre', 'warning'); return; }
-            if(!$('#region_id').val()) { notify('Atención', 'Falta región', 'warning'); return; }
-            if(!$('#direccion').val()) { notify('Atención', 'Falta dirección', 'warning'); return; }
-            if(!$('#admin_name').val() || !$('#admin_email').val()) { notify('Atención', 'Faltan datos de administrador', 'warning'); return; }
-            
-            if(dzLocal.getAcceptedFiles().length === 0) {
-                notify('Atención', 'Debes subir al menos 1 imagen del local', 'warning'); return;
+            if(!validarPaso1()) {
+                return;
             }
 
             $('#step-1').addClass('hidden');
@@ -1029,9 +1169,15 @@
             e.preventDefault();
             var submitBtn = $('#submit-btn');
             
-            // Validate Step 2 before submitting
-            if($('#carta_tipo').val() == 'imagenes' && dzCarta.getAcceptedFiles().length === 0) {
-                notify('Atención', 'Debes subir al menos 1 imagen de la carta', 'warning'); return;
+            // Re-validate Step 1
+            if(!validarPaso1()) {
+                $('#btn-prev').click();
+                return;
+            }
+
+            // Validate Step 2
+            if(!validarPaso2()) {
+                return;
             }
 
             submitBtn.prop('disabled', true).html('Registrando... <i class="icofont icofont-spinner-alt-4"></i>');

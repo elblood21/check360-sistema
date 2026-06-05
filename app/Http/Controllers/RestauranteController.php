@@ -576,6 +576,16 @@ class RestauranteController extends Controller
             return response()->json(['estado' => 500, 'mensaje' => 'El porcentaje de descuento debe estar entre 50% y 100%']);
         }
 
+        $direccion = $request->direccion;
+        if (!$direccion || trim($direccion) === '') {
+            return response()->json(['estado' => 500, 'mensaje' => 'Debe ingresar la dirección del restaurante']);
+        }
+
+        $ciudad_id = $request->ciudad_id;
+        if (!$ciudad_id) {
+            return response()->json(['estado' => 500, 'mensaje' => 'Debe seleccionar la ciudad/comuna']);
+        }
+
         // Validar imágenes del restaurante (al menos 1)
         if (!$request->hasFile('imagenes_files') || count($request->file('imagenes_files')) === 0) {
             return response()->json(['estado' => 500, 'mensaje' => 'Debe subir al menos 1 imagen real del restaurante']);

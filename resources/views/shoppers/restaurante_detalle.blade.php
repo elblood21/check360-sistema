@@ -503,31 +503,16 @@
                 <div class="card booking-card">
                     <div class="card-body p-4">
                         <h4 class="fw-bold mb-3">Agendar Visita</h4>
-                        <p class="text-muted small mb-4">Selecciona una fecha y hora para realizar tu evaluación. Recuerda que después de agendar deberás responder una breve pre-encuesta.</p>
+                        <p class="text-muted small mb-4">Agenda tu visita de evaluación. Recuerda que después de agendar deberás responder una breve pre-encuesta.</p>
                         
                         <form id="agendar-visita-form-detalle">
                             @csrf
                             <input type="hidden" name="restaurante_id_modal" value="{{ $restaurante->id }}">
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Fecha de Visita</label>
-                                <input type="date" name="fecha_visita" id="fecha_visita" class="form-control form-control-lg" required min="{{ date('Y-m-d') }}" style="border-radius: 12px;">
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Hora de Llegada</label>
-                                <select name="hora_visita" id="hora_visita" class="form-select form-select-lg" required style="border-radius: 12px;">
-                                    <option value="">Selecciona fecha primero</option>
-                                </select>
-                                <small class="text-muted mt-1 d-block">Solo se guardará la hora de inicio seleccionada.</small>
-                            </div>
-
-                            <div id="alert-peak" class="alert alert-danger d-none mb-4" style="border-radius: 12px;">
-                                <i class="icofont icofont-warning"></i> No se puede agendar en horario peak (90%+ ocupación). Por favor elige otra hora.
-                            </div>
+                            <input type="hidden" name="fecha_visita" id="fecha_visita_detalle_hidden">
+                            <input type="hidden" name="hora_visita" id="hora_visita_detalle_hidden">
 
                             <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" id="btn-reservar-detalle" style="border-radius: 12px; font-size: 1.1rem;">
-                                Confirmar y Continuar
+                                Agendar visita
                             </button>
                         </form>
 
@@ -596,59 +581,17 @@
         const horariosEvaluacion = @json($horariosEvaluacion);
         const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
 
-        // Dynamic Time Slot Generation
-        $('#fecha_visita').on('change', function() {
-            const fechaVal = $(this).val();
-            const $horaSelect = $('#hora_visita');
-            $horaSelect.empty().append('<option value="">Selecciona hora...</option>');
-            
-            if (!fechaVal) return;
+        function populateDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
 
-            // Get day of week
-            const parts = fechaVal.split('-');
-            const date = new Date(parts[0], parts[1] - 1, parts[2]);
-            const diaNombre = diasSemana[date.getDay()];
-            
-            const cfg = horariosEvaluacion[diaNombre];
-
-            if (cfg) {
-                // Handle different ways 'enabled' can be stored
-                const isEnabled = (cfg.enabled === true || cfg.enabled === 1 || cfg.enabled === '1' || cfg.enabled === 'true' || cfg.enabled === 'on');
-                
-                if (isEnabled) {
-                    let desde = cfg.desde;
-                    let hasta = cfg.hasta;
-                    
-                    if (desde && hasta) {
-                        let startHour = parseInt(desde.split(':')[0]);
-                        let endHour = parseInt(hasta.split(':')[0]);
-                        
-                        const peak = peakHours[diaNombre];
-                        
-                        for (let h = startHour; h < endHour; h++) {
-                            let hStr = h.toString().padStart(2, '0') + ':00';
-                            let nextHStr = (h + 1).toString().padStart(2, '0') + ':00';
-                            
-                            // Check if this slot is peak
-                            let isPeak = false;
-                            if (peak && peak.desde && peak.hasta && peak.ocupa_90) {
-                                if (hStr >= peak.desde && hStr < peak.hasta) {
-                                    isPeak = true;
-                                }
-                            }
-                            
-                            if (!isPeak) {
-                                $horaSelect.append(`<option value="${hStr}">${hStr} a ${nextHStr}</option>`);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            if ($horaSelect.children().length === 1) {
-                $horaSelect.empty().append('<option value="">Sin horarios disponibles para este día</option>');
-            }
-        });
+            $('#fecha_visita_detalle_hidden').val(`${year}-${month}-${day}`);
+            $('#hora_visita_detalle_hidden').val(`${hours}:${minutes}`);
+        }
 
         // Geocoding and Map Initialization
         const address = "{{ $restaurante->direccion }}, {{ $restaurante->ciudad ? $restaurante->ciudad->nombre : '' }}";
@@ -710,6 +653,7 @@
 
         $('#agendar-visita-form-detalle').submit(function(e) {
             e.preventDefault();
+            populateDateTime();
             
             var btn = $('#btn-reservar-detalle');
             btn.prop('disabled', true).text('Procesando...');
@@ -725,12 +669,12 @@
                             window.location.href = res.url;
                         }, 2000);
                     } else {
-                        btn.prop('disabled', false).text('Confirmar y Continuar');
+                        btn.prop('disabled', false).text('Agendar visita');
                         notify('Error al agendar', res.mensaje || 'Ocurrió un error', 'danger');
                     }
                 },
                 error: function(xhr) {
-                    btn.prop('disabled', false).text('Confirmar y Continuar');
+                    btn.prop('disabled', false).text('Agendar visita');
                     var msg = 'Ocurrió un error al agendar la visita.';
                     if (xhr.responseJSON && xhr.responseJSON.mensaje) {
                         msg = xhr.responseJSON.mensaje;

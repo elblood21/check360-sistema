@@ -1035,11 +1035,11 @@ class VisitaController extends Controller
         }
 
         $restaurante_id = $request->restaurante_id_modal;
-        $fecha_visita = $request->fecha_visita;
-        $hora_visita = $request->hora_visita;
+        $fecha_visita = $request->fecha_visita ?: \Carbon\Carbon::now()->format('Y-m-d');
+        $hora_visita = $request->hora_visita ?: \Carbon\Carbon::now()->format('H:i');
 
-        if (!$restaurante_id || !$fecha_visita || !$hora_visita) {
-            return response()->json(['estado' => 500, 'mensaje' => 'Todos los campos son obligatorios']);
+        if (!$restaurante_id) {
+            return response()->json(['estado' => 500, 'mensaje' => 'El local es obligatorio']);
         }
 
         $restaurante = Restaurante::find($restaurante_id);
