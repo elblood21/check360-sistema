@@ -82,9 +82,7 @@
               <div class="col-md-6">
                  <div class="form-group mb-0 me-0"></div>
                  <a class="btn btn-secondary actualizar" title="Actualizar listado" style="border-radius: 10px;">Actualizar</a>
-                 @if(!\App\Helpers\SubdominioHelper::esTipo('shopper'))
-                 <a class="btn btn-primary" href="{{route('visitas.nuevo')}}" style="border-radius: 10px;"> Crear visita</a>
-                 @endif
+                
                  <div class="">
                     <a data-bs-toggle="collapse" data-bs-target="#collapseFiltros" aria-expanded="false" aria-controls="collapseFiltros" class="btn btn-tertiary" style="border-radius: 10px;">Ver filtros</a>
                  </div>
@@ -483,10 +481,12 @@
                 // ACCIONES
                 toappend += '<td><div class="d-flex gap-2">';
                 toappend += '<button class="btn btn-light btn-xs ver" title="Ver Detalles"><i class="icofont icofont-eye text-primary"></i></button>';
+                @if(!\App\Helpers\SubdominioHelper::esTipo('sistema'))
                 if(d.estado_id == 1) {
                     toappend += '<button class="btn btn-light btn-xs editar" title="Editar"><i class="icofont icofont-pen text-warning"></i></button>';
                 }
                 toappend += '<button class="btn btn-light btn-xs eliminar" title="Eliminar"><i class="icofont icofont-trash text-danger"></i></button>';
+                @endif
                 toappend += '</div></td>';
 
                 toappend += "</tr>";

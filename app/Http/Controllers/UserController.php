@@ -221,9 +221,9 @@ class UserController extends Controller
                 $restaurante->checkAndResetPeriod();
             }
 
-            // Calcular visitas del periodo actual (completadas/finalizadas)
+            // Calcular visitas del periodo actual (pendientes y finalizadas)
             $visitasPeriodo = \App\Models\Visita::where('restaurante_id', $restaurante->id)
-                ->where('estado_id', 4) // Finalizada
+                ->whereIn('estado_id', [1, 2, 3, 4]) // Pendientes y finalizadas
                 ->where('fecha_asignacion', '>=', $restaurante->periodo_inicio)
                 ->where('fecha_asignacion', '<=', $restaurante->periodo_fin)
                 ->whereNull('deleted_at')

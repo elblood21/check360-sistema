@@ -88,6 +88,10 @@ class VisitaController extends Controller
 
     public function create(Request $request)
     {
+        if (\App\Helpers\SubdominioHelper::esTipo('sistema')) {
+            abort(403, 'No está permitido crear visitas desde el sistema.');
+        }
+
         $restaurantes = Restaurante::whereNull('deleted_at')->orderBy('name')->get();
         $estados = EstadoVisita::all();
 
@@ -184,6 +188,10 @@ class VisitaController extends Controller
 
     public function store(Request $request)
     {
+        if (\App\Helpers\SubdominioHelper::esTipo('sistema')) {
+            return response()->json(['estado' => 403, 'mensaje' => 'No está permitido crear visitas desde el sistema.']);
+        }
+
         $shopper_id = $request->shopper_id;
         $restaurante_id = $request->restaurante_id;
         $fecha_asignacion = $request->fecha_asignacion;
@@ -257,7 +265,7 @@ class VisitaController extends Controller
             }
         }
 
-        $puedeEditar = ($tipo === 'sistema' && $visita->estado_id == 1);
+        $puedeEditar = false; // Se deshabilitó la edición de visitas en el sistema
 
         return view('visitas.ver')->with([
             'visita' => $visita,
@@ -267,6 +275,10 @@ class VisitaController extends Controller
 
     public function edit($id)
     {
+        if (\App\Helpers\SubdominioHelper::esTipo('sistema')) {
+            abort(403, 'No está permitido editar visitas desde el sistema.');
+        }
+
         $id = decrypt($id);
 
         $visita = Visita::where('id', $id)->whereNull('deleted_at')->first();
@@ -297,6 +309,10 @@ class VisitaController extends Controller
 
     public function update(Request $request)
     {
+        if (\App\Helpers\SubdominioHelper::esTipo('sistema')) {
+            return response()->json(['estado' => 403, 'mensaje' => 'No está permitido editar visitas desde el sistema.']);
+        }
+
         $id = decrypt($request->id);
         
         // Verificar que la visita existe y está en estado 1 (Pendiente)
@@ -347,6 +363,10 @@ class VisitaController extends Controller
 
     public function eliminar(Request $request)
     {
+        if (\App\Helpers\SubdominioHelper::esTipo('sistema')) {
+            return response()->json(['estado' => 403, 'mensaje' => 'No está permitido eliminar visitas desde el sistema.']);
+        }
+
         $id = decrypt($request->id);
 
         $update = Visita::find($id);

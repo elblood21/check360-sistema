@@ -82,7 +82,7 @@ class Restaurante extends Model
         }
 
         return \App\Models\Visita::where('restaurante_id', $this->id)
-            ->where('estado_id', 4) // Finalizada
+            ->whereIn('estado_id', [1, 2, 3, 4]) // Pendientes y finalizadas
             ->where('fecha_asignacion', '>=', $this->periodo_inicio)
             ->where('fecha_asignacion', '<=', $this->periodo_fin)
             ->whereNull('deleted_at')
@@ -114,9 +114,9 @@ class Restaurante extends Model
             $this->save();
         }
 
-        // Contar visitas finalizadas (estado_id = 4) en el periodo actual
+        // Contar visitas pendientes y finalizadas (estado_id 1, 2, 3, 4) en el periodo actual
         $visitasCount = \App\Models\Visita::where('restaurante_id', $this->id)
-            ->where('estado_id', 4) // Finalizada
+            ->whereIn('estado_id', [1, 2, 3, 4]) // Pendientes y finalizadas
             ->where('fecha_asignacion', '>=', $this->periodo_inicio)
             ->where('fecha_asignacion', '<=', $this->periodo_fin)
             ->whereNull('deleted_at')
