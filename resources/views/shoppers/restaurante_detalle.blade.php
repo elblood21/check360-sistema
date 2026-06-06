@@ -75,6 +75,10 @@
         border: 1px solid rgba(0,0,0,0.05);
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         background: #ffffff;
+        margin-top: 40px;
+    }
+    .booking-card .bg-light {
+        color: #475569 !important;
     }
     .social-link {
         width: 40px;
@@ -238,8 +242,15 @@
     $logo = $restaurante->logo ? $restaurante->logo : asset('assets/images/dashboard/avtar.jpg');
 
     // Smart Schedule Calculation
-    $horariosEvaluacion = $opciones['horarios_evaluacion']['valor_json'] ?? [];
-    if (is_string($horariosEvaluacion)) $horariosEvaluacion = json_decode($horariosEvaluacion, true) ?: [];
+    $horariosEvaluacionRaw = $opciones['horarios_evaluacion']['valor_json'] ?? [];
+    if (is_string($horariosEvaluacionRaw)) {
+        $horariosEvaluacion = json_decode($horariosEvaluacionRaw, true) ?: [];
+    } else {
+        $horariosEvaluacion = $horariosEvaluacionRaw;
+    }
+    if (!is_array($horariosEvaluacion)) {
+        $horariosEvaluacion = [];
+    }
     
     $peakHours = $restaurante->horario_peak;
     if (is_string($peakHours)) $peakHours = json_decode($peakHours, true) ?: [];
@@ -258,9 +269,18 @@
 
     foreach ($diasLabels as $key => $label) {
         $cfg = $horariosEvaluacion[$key] ?? null;
-        if (is_string($cfg)) $cfg = json_decode($cfg, true);
+        if (is_string($cfg)) {
+            $cfg = json_decode($cfg, true);
+        }
+        
+        if (!is_array($cfg)) {
+            continue;
+        }
         
         $en = $cfg['enabled'] ?? false;
+        if (is_string($en)) {
+            $en = strtolower(trim($en));
+        }
         $isEnabled = ($en === true || $en === 1 || $en === '1' || $en === 'true' || $en === 'on');
         
         $desdeStd = $cfg['desde'] ?? null;
@@ -470,7 +490,7 @@
                         <p class="small text-muted mb-3">A continuación se muestran los horarios disponibles para realizar tu visita Mystery Shopper, excluyendo automáticamente los bloques de saturación o alta ocupación.</p>
                         
                         <div class="row row-cols-1 row-cols-md-2 g-3">
-                            @foreach($diasMostrar as $diaKey => $dia)
+                            @forelse($diasMostrar as $diaKey => $dia)
                                 <div class="col">
                                     <div class="card border-0 shadow-sm p-3 h-100" style="background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid rgba(0,0,0,0.05) !important;">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -493,7 +513,14 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="col-12">
+                                    <div class="alert alert-light text-center py-4" style="border-radius: 16px; border: 1px dashed rgba(0,0,0,0.1) !important; background: rgba(0,0,0,0.02);">
+                                        <i class="icofont icofont-clock-time text-muted mb-2 d-block" style="font-size: 2rem;"></i>
+                                        <p class="mb-0 text-muted small">No hay horarios de atención o reservas disponibles para este local.</p>
+                                    </div>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
