@@ -136,11 +136,9 @@
               <table class="table table-hover align-middle">
                 <thead class="bg-light">
                   <tr>
-                    <th scope="col" style="border-top-left-radius: 16px;">Estado</th>
-                    <th scope="col">Shopper</th>
+                    <th scope="col" style="border-top-left-radius: 16px;">Shopper</th>
                     <th scope="col">Restaurante / Dirección</th>
-                    <th scope="col">Fechas</th>
-                    <th scope="col">Cuestionarios</th>
+                    <th scope="col">Estado</th>
                     <th scope="col">Finanzas / Cupón</th>
                     <th scope="col" style="border-top-right-radius: 16px;">Acciones</th>
                   </tr>
@@ -438,6 +436,12 @@
             $.each(data, function(i, d) {
                 toappend += "<tr data-id='"+i+"'>";
 
+                // SHOPPER
+                toappend += '<td><div class="fw-bold text-dark">' + (d.shopper ? d.shopper.name : 'N/A') + '</div><small class="text-muted">' + (d.shopper ? d.shopper.email : '') + '</small></td>';
+
+                // RESTAURANTE / DIRECCION
+                toappend += '<td><div class="fw-bold text-primary">' + (d.restaurante ? d.restaurante.name : 'N/A') + '</div><small class="text-muted"><i class="icofont icofont-location-pin"></i> ' + (d.restaurante ? d.restaurante.direccion : 'S/D') + '</small></td>';
+                
                 // ESTADO
                 var estadoNombre = 'N/A';
                 var estadoColor = 'secondary';
@@ -461,36 +465,6 @@
                     estadoColor = 'dark';
                 }
                 toappend += '<td><span class="badge rounded-pill bg-light-' + estadoColor + ' text-' + estadoColor + ' fw-bold px-3">' + estadoNombre + '</span></td>';
-
-                // SHOPPER
-                toappend += '<td><div class="fw-bold text-dark">' + (d.shopper ? d.shopper.name : 'N/A') + '</div><small class="text-muted">' + (d.shopper ? d.shopper.email : '') + '</small></td>';
-
-                // RESTAURANTE / DIRECCION
-                toappend += '<td><div class="fw-bold text-primary">' + (d.restaurante ? d.restaurante.name : 'N/A') + '</div><small class="text-muted"><i class="icofont icofont-location-pin"></i> ' + (d.restaurante ? d.restaurante.direccion : 'S/D') + '</small></td>';
-                
-                // FECHAS (Inicio y Término)
-                var fechaInicio = 'N/A';
-                if(d.created_at) {
-                    var f = new Date(d.created_at);
-                    fechaInicio = f.toLocaleDateString() + ' ' + f.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                }
-                var fechaTermino = '<span class="text-muted">En proceso...</span>';
-                if(d.fecha_termino) {
-                    var f = new Date(d.fecha_termino);
-                    fechaTermino = '<span class="text-success fw-bold">' + f.toLocaleDateString() + ' ' + f.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + '</span>';
-                }
-                toappend += '<td><div class="small"><b>Inicio:</b> ' + fechaInicio + '</div><div class="small"><b>Termino:</b> ' + fechaTermino + '</div></td>';
-                
-                // CUESTIONARIOS
-                var badgePre = d.pre_encuesta_count > 0 
-                    ? '<div class="d-flex align-items-center text-success mb-1"><i class="icofont icofont-check-circled me-1"></i> <small>Inicial: Completado</small></div>' 
-                    : '<div class="d-flex align-items-center text-warning mb-1"><i class="icofont icofont-clock-time me-1"></i> <small>Inicial: Pendiente</small></div>';
-                
-                var badgePost = d.post_encuesta_count > 0 
-                    ? '<div class="d-flex align-items-center text-success"><i class="icofont icofont-check-circled me-1"></i> <small>Final: Completado</small></div>' 
-                    : '<div class="d-flex align-items-center text-warning"><i class="icofont icofont-clock-time me-1"></i> <small>Final: Pendiente</small></div>';
-                
-                toappend += '<td>' + badgePre + badgePost + '</td>';
 
                 // FINANZAS / CUPON
                 var total = d.total_consumo ? '$' + Number(d.total_consumo).toLocaleString() : '$0';
