@@ -265,6 +265,15 @@ class VisitaController extends Controller
             }
         }
 
+        // Si es un restaurante, verificar que la visita le pertenece y está finalizada (estado_id = 4)
+        if ($tipo === 'restaurante') {
+            $guard = \App\Helpers\SubdominioHelper::obtenerGuard();
+            $user = \Auth::guard($guard)->user();
+            if (!$user || $visita->restaurante_id != $user->restaurante_id || $visita->estado_id != 4) {
+                return redirect()->route('dashboard')->with('error', 'No tienes permiso para ver esta visita');
+            }
+        }
+
         $puedeEditar = false; // Se deshabilitó la edición de visitas en el sistema
 
         return view('visitas.ver')->with([

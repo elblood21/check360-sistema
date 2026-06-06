@@ -163,6 +163,17 @@
     elseif($visita->estado_id == 5) $estadoColor = 'danger';
     elseif($visita->estado_id == 6) $estadoColor = 'dark';
 
+    // Custom state names
+    $estadoNombresMap = [
+        1 => 'Cuestionario inicial pendiente',
+        2 => 'Visita pendiente',
+        3 => 'Cuestionario final pendiente',
+        4 => 'Finalizada',
+        5 => 'Cancelada',
+        6 => 'Rechazada',
+    ];
+    $estadoNombre = $estadoNombresMap[$visita->estado_id] ?? ($visita->estado ? $visita->estado->nombre : 'N/A');
+
     // Survey count/loaded checks
     if(!$visita->relationLoaded('respuestas')) {
         $visita->load('respuestas');
@@ -206,7 +217,7 @@
                         <!-- Left coordinate shifted to 130px to sit next to the logo and prevent overlap -->
                         <div class="position-absolute text-white pe-3" style="bottom: 15px; left: 130px; z-index: 10; width: calc(100% - 150px);">
                             <span class="badge bg-{{ $estadoColor }} text-white mb-2" style="border-radius: 12px; padding: 5px 12px; font-size: 0.72rem; font-weight: 700;">
-                                {{ $visita->estado ? $visita->estado->nombre : 'N/A' }}
+                                {{ $estadoNombre }}
                             </span>
                             <h4 class="fw-bold mb-1 text-white" style="font-size: 1.45rem; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">{{ $rest ? $rest->name : 'N/A' }}</h4>
                             <div class="small d-flex align-items-center" style="opacity: 0.95; font-size: 0.78rem;">
@@ -454,7 +465,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center mb-4">
                             <span class="badge bg-{{ $estadoColor }} text-white px-3 py-2 rounded-pill fs-6 w-100">
-                                {{ $visita->estado ? $visita->estado->nombre : 'N/A' }}
+                                {{ $estadoNombre }}
                             </span>
                             @if($puedeEditar)
                                 <a class="btn btn-outline-primary btn-xs ms-2" href="{{ route('visitas.editar', ['id' => encrypt($visita->id)]) }}" title="Editar Visita">

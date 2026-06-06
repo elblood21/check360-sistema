@@ -192,7 +192,7 @@ class UserController extends Controller
                 ->join('preguntas_encuestas', 'respuestas_visitas.pregunta_id', '=', 'preguntas_encuestas.id')
                 ->join('visitas', 'respuestas_visitas.visita_id', '=', 'visitas.id')
                 ->where('visitas.restaurante_id', $restaurante->id)
-                ->whereIn('visitas.estado_id', [3, 4]) // Completadas o Finalizadas
+                ->where('visitas.estado_id', 4) // Solo finalizadas (cuestionario final completado)
                 ->whereIn('preguntas_encuestas.dimension', array_keys($dimensiones_map))
                 ->where('preguntas_encuestas.tipo_respuesta', 'escala_1_5') // Asegurar que solo sumamos escalas numéricas
                 ->select(
@@ -236,8 +236,9 @@ class UserController extends Controller
                 $diasRestantes = max(0, (int)\Carbon\Carbon::now()->diffInDays($fin, false));
             }
 
-            // Obtener todas las visitas para la lista de trazabilidad
+            // Obtener todas las visitas para la lista de trazabilidad (Solo finalizadas)
             $todasVisitas = \App\Models\Visita::where('restaurante_id', $restaurante->id)
+                ->where('estado_id', 4) // Solo finalizadas (cuestionario final completado)
                 ->whereNull('deleted_at')
                 ->with(['shopper', 'estado'])
                 ->orderBy('created_at', 'DESC')

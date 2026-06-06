@@ -333,11 +333,27 @@
                         fechaFormateada += ' - ' + d.hora_asignacion.substring(0, 5) + ' hs';
                     }
 
+                    var estadoNombre = 'N/A';
                     var estadoColor = 'warning';
-                    if(d.estado_id == 2) estadoColor = 'info';
-                    else if(d.estado_id == 3) estadoColor = 'primary';
-                    else if(d.estado_id == 4) estadoColor = 'success';
-                    else if(d.estado_id == 5) estadoColor = 'danger';
+                    if(d.estado_id == 1) {
+                        estadoNombre = 'Cuestionario inicial pendiente';
+                        estadoColor = 'warning';
+                    } else if(d.estado_id == 2) {
+                        estadoNombre = 'Visita pendiente';
+                        estadoColor = 'info';
+                    } else if(d.estado_id == 3) {
+                        estadoNombre = 'Cuestionario final pendiente';
+                        estadoColor = 'primary';
+                    } else if(d.estado_id == 4) {
+                        estadoNombre = 'Finalizada';
+                        estadoColor = 'success';
+                    } else if(d.estado_id == 5) {
+                        estadoNombre = 'Cancelada';
+                        estadoColor = 'danger';
+                    } else if(d.estado_id == 6) {
+                        estadoNombre = 'Rechazada';
+                        estadoColor = 'dark';
+                    }
 
                     cardsHtml += `
                         <div class="col-md-6 col-lg-4">
@@ -361,7 +377,7 @@
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <span class="small text-muted dark-text-gray" style="font-size: 0.75rem;"><i class="icofont icofont-calendar"></i> ${fechaFormateada}</span>
                                             <span class="badge bg-light-${estadoColor} text-${estadoColor} rounded-pill" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px;">
-                                                ${d.estado ? d.estado.nombre : 'N/A'}
+                                                ${estadoNombre}
                                             </span>
                                         </div>
 
@@ -423,14 +439,27 @@
                 toappend += "<tr data-id='"+i+"'>";
 
                 // ESTADO
-                var estadoNombre = d.estado ? d.estado.nombre : 'N/A';
+                var estadoNombre = 'N/A';
                 var estadoColor = 'secondary';
-                if(d.estado_id == 1) estadoColor = 'warning';
-                else if(d.estado_id == 2) estadoColor = 'info';
-                else if(d.estado_id == 3) estadoColor = 'primary';
-                else if(d.estado_id == 4) estadoColor = 'success';
-                else if(d.estado_id == 5) estadoColor = 'danger';
-                else if(d.estado_id == 6) estadoColor = 'dark';
+                if(d.estado_id == 1) {
+                    estadoNombre = 'Cuestionario inicial pendiente';
+                    estadoColor = 'warning';
+                } else if(d.estado_id == 2) {
+                    estadoNombre = 'Visita pendiente';
+                    estadoColor = 'info';
+                } else if(d.estado_id == 3) {
+                    estadoNombre = 'Cuestionario final pendiente';
+                    estadoColor = 'primary';
+                } else if(d.estado_id == 4) {
+                    estadoNombre = 'Finalizada';
+                    estadoColor = 'success';
+                } else if(d.estado_id == 5) {
+                    estadoNombre = 'Cancelada';
+                    estadoColor = 'danger';
+                } else if(d.estado_id == 6) {
+                    estadoNombre = 'Rechazada';
+                    estadoColor = 'dark';
+                }
                 toappend += '<td><span class="badge rounded-pill bg-light-' + estadoColor + ' text-' + estadoColor + ' fw-bold px-3">' + estadoNombre + '</span></td>';
 
                 // SHOPPER

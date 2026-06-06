@@ -112,11 +112,6 @@ class Visita extends Model
 
     public static function expirarVisitasVencidas()
     {
-        // Solo expirar si estamos en el subdominio shopper
-        if (!\App\Helpers\SubdominioHelper::esTipo('shopper')) {
-            return;
-        }
-
         // Encontrar visitas en estado 1 (Pendiente) que tengan más de 24 horas desde creadas sin contestar pre-encuesta
         $visitasVencidas = self::where('estado_id', 1)
             ->where('created_at', '<', Carbon::now()->subHours(24))
