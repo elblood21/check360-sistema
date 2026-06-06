@@ -1208,8 +1208,8 @@
                 processData: false,
                 success: function(res) {
                     if (res.estado == 200) {
-                        notify('Registro Exitoso', 'Tu restaurante ha sido registrado. Se ha enviado contraseña al administrador.', 'success', 5000);
-                        setTimeout(function() { window.location.href = "{{ route('loginX') }}"; }, 3000);
+                        notify('Registro Exitoso', 'Tu restaurante ha sido registrado. Tu cuenta se encuentra pendiente de aprobación. Recibirás tus datos de acceso por email una vez aprobado.', 'success', 8000);
+                        setTimeout(function() { window.location.href = "{{ route('loginX') }}"; }, 4000);
                     } else {
                         submitBtn.prop('disabled', false).html('Completar Registro <i class="icofont icofont-check-circled"></i>');
                         notify('Error', res.mensaje || 'Ocurrió un error', 'danger');

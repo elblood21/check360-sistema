@@ -1,90 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check 360</title>
-    <link href="https://fonts.googleapis.com/css?family=Work+Sans:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <style type="text/css">
-      body{
-      width: 650px;
-      font-family: work-Sans, sans-serif;
-      background-color: #f6f7fb;
-      display: block;
-      }
-      a{
-      text-decoration: none;
-      }
-      span {
-      font-size: 14px;
-      }
-      p {
-        font-size: 13px;
-        line-height: 1.7;
-        letter-spacing: 0.7px;
-        margin-top: 0;
-      }
-      .text-center{
-      text-align: center
-      }
-      h6 {
-      font-size: 16px;
-      margin: 0 0 18px 0;
-      }
-    </style>
-  </head>
-  <body style="margin: 30px auto;">
-    <table style="width: 100%;background-color:#f6f7fb;">
-      <tbody>
-        <tr>
-          <td>
-            <table style="background-color: #f6f7fb; width: 100%">
-              <tbody>
-                <tr>
-                  <td>
-                    <table style="width: 650px; margin: 0 auto; margin-bottom: 30px">
-                      <tbody>
-                        <tr>
-                          <td><img style="width: 11rem;margin-top: 1rem;" src="{{ asset('assets/images/logo/logo_check360.png') }}" alt=""></td>
-                          <td style="text-align: right; color:#999"><span>-</span></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table style="width: 650px; margin: 0 auto; background-color: #fff; border-radius: 8px">
-              <tbody>
-                <tr>
-                  <td style="padding: 30px"> 
-                    <h6 style="font-weight: 600">{{$data['titulo']}}</h6>
-                    <p>Se ha habilitado el acceso para tu cliente {{$data['cliente']->razon_social}}.
-                    
-                    <br>
-                    <br>
-                    <p style="margin-bottom: 0">
-                      Saluda, <br><strong>Equipo de Check 360</strong></p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table style="width: 650px; margin: 0 auto; margin-top: 30px">
-              <tbody>       
-                <tr style="text-align: center">
-                  <td> 
-                    <p style="color: #999; margin-bottom: 0">No responder a este correo, es un correo auto-generado</p>
-                    
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </body>
+    <title>Cliente Activado - Check 360</title>
+</head>
+<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f7f6;">
+    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Check 360</h1>
+    </div>
+    
+    <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <h2 style="color: #1e3a8a; margin-top: 0;">{{ $titulo ?? 'Cliente Habilitado' }}</h2>
+        
+        <p>Hola,</p>
+        
+        <p>Te informamos que se ha habilitado exitosamente el acceso para el cliente <strong>{{ $cliente->razon_social }}</strong> en la plataforma <strong>Check 360</strong>.</p>
+        
+        <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6; margin: 25px 0;">
+            <p style="margin: 0; font-size: 15px; color: #1e40af;">
+                La cuenta del cliente ahora está operativa y puede acceder a todas las funcionalidades contratadas.
+            </p>
+        </div>
+
+        <p>Si necesitas realizar configuraciones adicionales o tienes alguna duda, por favor contacta al equipo de soporte.</p>
+        
+        <p style="margin-top: 40px;">Atentamente,<br><strong>Equipo de Check 360</strong></p>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
+        <p>Este es un correo automático, por favor no responder.</p>
+    </div>
+</body>
 </html>

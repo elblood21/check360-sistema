@@ -185,9 +185,15 @@
     $tieneRespuestasSalida = $respuestasSalida->count() > 0;
 
     // Dates for summary
-    $fechaCuestionarioInicio = $respuestasEntrada->first()?->created_at ? \Carbon\Carbon::parse($respuestasEntrada->first()->created_at)->format('d/m/Y H:i') : 'Pendiente';
-    $fechaVisita = $visita->visitado_at ? \Carbon\Carbon::parse($visita->visitado_at)->format('d/m/Y H:i') : ($visita->fecha_asignacion ? \Carbon\Carbon::parse($visita->fecha_asignacion)->format('d/m/Y') . ' ' . date('H:i', strtotime($visita->hora_asignacion)) : 'Pendiente');
-    $fechaCuestionarioFinal = $respuestasSalida->first()?->created_at ? \Carbon\Carbon::parse($respuestasSalida->first()->created_at)->format('d/m/Y H:i') : 'Pendiente';
+    $fechaCuestionarioInicio = $respuestasEntrada->first()?->created_at 
+        ? \Carbon\Carbon::parse($respuestasEntrada->first()->created_at)->setTimezone('America/Santiago')->format('d/m/Y H:i') 
+        : 'Pendiente';
+    $fechaVisita = $visita->visitado_at 
+        ? \Carbon\Carbon::parse($visita->visitado_at)->setTimezone('America/Santiago')->format('d/m/Y H:i') 
+        : 'Pendiente';
+    $fechaCuestionarioFinal = $respuestasSalida->first()?->created_at 
+        ? \Carbon\Carbon::parse($respuestasSalida->first()->created_at)->setTimezone('America/Santiago')->format('d/m/Y H:i') 
+        : 'Pendiente';
 
     // Financial calculations
     $totalConsumo = $visita->total_consumo ? '$' . number_format($visita->total_consumo, 0, ',', '.') : 'N/A';
@@ -376,6 +382,7 @@
                     @endif
 
                     <!-- Questionnaires Modal buttons bar next to each other -->
+                    {{--
                     @if($tieneRespuestasEntrada || $tieneRespuestasSalida)
                         <hr class="my-4" style="opacity: 0.15; border-color: rgba(0,0,0,0.15);">
                         <div class="mb-2">
@@ -395,6 +402,7 @@
                             @endif
                         </div>
                     @endif
+                    --}}
                 </div>
             </div>
 
@@ -571,7 +579,7 @@
                                 <div class="timeline-dot bg-secondary me-3" style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;"></div>
                                 <div>
                                     <small class="text-muted d-block">Visita Agendada (Asignación)</small>
-                                    <span class="fw-bold small dark-text-white">{{ $visita->created_at->format('d/m/Y H:i') }} hs</span>
+                                    <span class="fw-bold small dark-text-white">{{ $visita->created_at->setTimezone('America/Santiago')->format('d/m/Y H:i') }} hs</span>
                                 </div>
                             </div>
                             <!-- Cuestionario Inicial -->
@@ -589,7 +597,7 @@
                                     <small class="text-muted d-block">Visita al Local</small>
                                     <span class="fw-bold small {{ $visita->visitado_at ? 'text-success' : 'text-muted' }}">
                                         @if($visita->visitado_at)
-                                            {{ \Carbon\Carbon::parse($visita->visitado_at)->format('d/m/Y H:i') }}
+                                            {{ \Carbon\Carbon::parse($visita->visitado_at)->setTimezone('America/Santiago')->format('d/m/Y H:i') }}
                                         @else
                                             Pendiente (Programada: {{ \Carbon\Carbon::parse($visita->fecha_asignacion)->format('d/m/Y') }} {{ date('H:i', strtotime($visita->hora_asignacion)) }})
                                         @endif

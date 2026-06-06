@@ -626,6 +626,23 @@ class VisitaController extends Controller
         $visita->estado_id = 2;
         $visita->save();
 
+        // Enviar email de confirmación de encuesta inicial
+        if ($visita->shopper && $visita->shopper->email) {
+            try {
+                $dataEmail = [
+                    'nombre' => $visita->shopper->name,
+                    'restaurante' => $visita->restaurante ? $visita->restaurante->name : 'N/A',
+                    'descuento' => $visita->restaurante ? $visita->restaurante->porcentaje_descuento : 0,
+                    'plataforma' => 'https://shopper.check360.cl',
+                    'titulo' => '¡Expectativas Registradas! - Check 360',
+                    'vista' => 'mails.visita_inicio_completado'
+                ];
+                \Mail::to($visita->shopper->email)->send(new \App\Mail\enviarEmail($dataEmail));
+            } catch (\Throwable $e) {
+                \Log::error("Error enviando email inicio cuestionario: " . $e->getMessage());
+            }
+        }
+
         return response()->json(['estado' => 200, 'mensaje' => 'Encuesta de entrada guardada correctamente. Ahora debes realizar la visita y marcarla como completada.']);
     }
 
@@ -755,6 +772,32 @@ class VisitaController extends Controller
         $visita->estado_id = 4;
         $visita->cupon_codigo = 'CK360' . strtoupper(\Str::random(6));
         $visita->save();
+
+        // Enviar email de finalización con cupón (si corresponde)
+        if ($visita->shopper && $visita->shopper->email) {
+            $tieneCupon = false;
+            if ($preSurveyResponse) {
+                $horasTranscurridas = $preSurveyResponse->created_at->diffInHours(Carbon::now());
+                if ($horasTranscurridas <= 24) {
+                    $tieneCupon = true;
+                }
+            }
+
+            try {
+                $dataEmail = [
+                    'nombre' => $visita->shopper->name,
+                    'restaurante' => $visita->restaurante ? $visita->restaurante->name : 'N/A',
+                    'descuento' => $visita->restaurante ? $visita->restaurante->porcentaje_descuento : 0,
+                    'tiene_cupon' => $tieneCupon,
+                    'cupon_codigo' => $visita->cupon_codigo,
+                    'titulo' => 'Evaluación Finalizada - Check 360',
+                    'vista' => 'mails.visita_final_completado'
+                ];
+                \Mail::to($visita->shopper->email)->send(new \App\Mail\enviarEmail($dataEmail));
+            } catch (\Throwable $e) {
+                \Log::error("Error enviando email finalización visita: " . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'estado' => 200, 

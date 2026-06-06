@@ -179,30 +179,49 @@
         var index = $(this).closest('tr').data('id');
         var d = data[index];
 
-        swal("¿Rechazar y eliminar el restaurante " + d.name + "?", {
+        swal({
+            title: "¿Rechazar y eliminar el restaurante " + d.name + "?",
+            text: "Indica el motivo del rechazo (se enviará al cliente por email):",
+            content: {
+                element: "input",
+                attributes: {
+                    placeholder: "Ej: Documentación incompleta o no cumple requisitos.",
+                    type: "text",
+                },
+            },
             buttons: {
                 cancel: "Cancelar",
                 confirmar: {
-                    text: "Rechazar",
-                    value: "confirmar",
+                    text: "Confirmar Rechazo",
+                    closeModal: false,
                 }
             },
         }).then((value) => {
-            if (value == "confirmar") {
-                $.ajax({
-                    url: '{{route("restaurantes.rechazar")}}',
-                    method: 'POST',
-                    data: { id: d.id_encrypted, _token: '{{csrf_token()}}' },
-                    success: function(res) {
-                        if (res.estado == 200) {
-                            notify("Éxito", "Restaurante rechazado", "success");
-                            getData();
-                        } else {
-                            notify("Error", res.mensaje || "Error", "danger");
-                        }
+            if (value === null) return; // Cancelado
+            
+            var motivo = value || "No cumple con los requisitos mínimos de la plataforma.";
+
+            $.ajax({
+                url: '{{route("restaurantes.rechazar")}}',
+                method: 'POST',
+                data: { id: d.id_encrypted, motivo: motivo, _token: '{{csrf_token()}}' },
+                success: function(res) {
+                    swal.stopLoading();
+                    if (res.estado == 200) {
+                        notify("Éxito", "Restaurante rechazado y notificado", "success");
+                        swal.close();
+                        getData();
+                    } else {
+                        notify("Error", res.mensaje || "Error", "danger");
+                        swal.close();
                     }
-                });
-            }
+                },
+                error: function() {
+                    swal.stopLoading();
+                    swal.close();
+                    notify("Error", "Ocurrió un error al procesar el rechazo", "danger");
+                }
+            });
         });
     });
 

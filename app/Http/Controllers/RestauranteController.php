@@ -207,7 +207,27 @@ class RestauranteController extends Controller
         $restaurante->estado = 1;
         $restaurante->save();
 
-        // Podríamos enviar un email avisando que fue aprobado si se requiere
+        // Activar usuario admin y enviar credenciales
+        if ($restaurante->admin) {
+            $passTemp = \Str::random(8);
+            $restaurante->admin->password = \Hash::make($passTemp);
+            $restaurante->admin->estado = 1;
+            $restaurante->admin->save();
+
+            try {
+                $dataEmail = [
+                    'correo_electronico' => $restaurante->admin->email,
+                    'titulo' => 'Cuenta aprobada - Check 360',
+                    'nombre' => $restaurante->admin->name,
+                    'pass' => $passTemp,
+                    'plataforma' => 'https://restaurante.check360.cl',
+                    'vista' => 'mails.restaurante_aprobado'
+                ];
+                \Mail::to($restaurante->admin->email)->send(new \App\Mail\enviarEmail($dataEmail));
+            } catch (\Throwable $e) {
+                \Log::error("Error enviando email de aprobacion restaurante: " . $e->getMessage());
+            }
+        }
         
         return response()->json(['estado' => 200, 'mensaje' => 'Restaurante aprobado correctamente']);
     }
@@ -221,9 +241,27 @@ class RestauranteController extends Controller
             return response()->json(['estado' => 404, 'mensaje' => 'Restaurante no encontrado']);
         }
 
-        $restaurante->aprobado = 2; // O simplemente eliminarlo
+        // Guardar email antes de borrar/marcar
+        $admin = $restaurante->admin;
+
+        $restaurante->aprobado = 2; 
         $restaurante->deleted_at = now();
         $restaurante->save();
+
+        if ($admin && $admin->email) {
+            try {
+                $dataEmail = [
+                    'correo_electronico' => $admin->email,
+                    'titulo' => 'Registro no aprobado - Check 360',
+                    'nombre' => $admin->name,
+                    'motivo' => $request->motivo ?? 'No cumple con los requisitos mínimos de la plataforma.',
+                    'vista' => 'mails.restaurante_rechazado'
+                ];
+                \Mail::to($admin->email)->send(new \App\Mail\enviarEmail($dataEmail));
+            } catch (\Throwable $e) {
+                \Log::error("Error enviando email de rechazo restaurante: " . $e->getMessage());
+            }
+        }
 
         return response()->json(['estado' => 200, 'mensaje' => 'Restaurante rechazado']);
     }
@@ -293,7 +331,7 @@ class RestauranteController extends Controller
 
     private function crearUsuarioRestaurante(int $restaurante_id, string $nombre, string $email): void
     {
-        // Verificar si ya existe un usuario para este restaurante (doble check)
+        // Verificar si ya existe un usuario para este restaurante
         $usuarioExistente = RestauranteUser::where('restaurante_id', $restaurante_id)
             ->whereNull('deleted_at')
             ->first();
@@ -302,7 +340,9 @@ class RestauranteController extends Controller
             return;
         }
 
-        // Generar password temporal
+        $restaurante = Restaurante::find($restaurante_id);
+
+        // Generar password temporal (se enviará solo si se aprueba)
         $pass = \Str::random(8);
 
         $newUser = new RestauranteUser();
@@ -310,24 +350,31 @@ class RestauranteController extends Controller
         $newUser->name = $nombre;
         $newUser->email = $email;
         $newUser->password = \Hash::make($pass);
-        $newUser->estado = 1;
+        $newUser->estado = ($restaurante && $restaurante->aprobado == 1) ? 1 : 0;
         $newUser->save();
 
-        // Enviar email con credenciales
+        // Enviar email según estado
         try {
-            $dataEmail = [
-                'correo_electronico' => $email,
-                'titulo' => 'Bienvenido a Check 360 - Tus credenciales',
-                'p1' => 'Hola ' . $nombre . ', se ha creado una cuenta para tu restaurante en nuestra plataforma.',
-                'p2' => 'Estas son tus credenciales de acceso:',
-                'user' => $email,
-                'pass' => $pass,
-                'link' => 'https://restaurante.check360.cl',
-                'vista' => 'mails.newuser'
-            ];
+            if ($restaurante && $restaurante->aprobado == 1) {
+                $dataEmail = [
+                    'correo_electronico' => $email,
+                    'titulo' => 'Bienvenido a Check 360 - Tus credenciales',
+                    'nombre' => $nombre,
+                    'pass' => $pass,
+                    'plataforma' => 'https://restaurante.check360.cl',
+                    'vista' => 'mails.restaurante_aprobado'
+                ];
+            } else {
+                $dataEmail = [
+                    'correo_electronico' => $email,
+                    'titulo' => 'Registro pendiente de aprobación - Check 360',
+                    'nombre' => $nombre,
+                    'vista' => 'mails.restaurante_registro'
+                ];
+            }
             \Mail::to($email)->send(new \App\Mail\enviarEmail($dataEmail));
         } catch (\Throwable $e) {
-            \Log::error("Error enviando email de bienvenida: " . $e->getMessage() . " - Line: " . $e->getLine());
+            \Log::error("Error enviando email restaurante: " . $e->getMessage());
         }
     }
 
@@ -444,27 +491,39 @@ class RestauranteController extends Controller
 
         $pass = \Str::random(8);
 
+        $restaurante = Restaurante::find($restaurante_id);
+
         $new = new RestauranteUser();
         $new->name = $nombre;
         $new->email = $email;
         $new->restaurante_id = $restaurante_id;
         $new->password = \Hash::make($pass);
-        $new->estado = 1;
+        $new->estado = ($restaurante && $restaurante->aprobado == 1) ? 1 : 0;
         $new->save();
 
         // Enviar email
         try {
-            $dataEmail = [
-                'correo_electronico' => $email,
-                'titulo' => 'Bienvenido a Check 360 - Admin Restaurante',
-                'vista' => 'mails.newuser',
-                'nombre' => $nombre,
-                'pass' => $pass,
-                'plataforma' => 'https://restaurante.check360.cl'
-            ];
-            \Mail::to($email)->send(new \App\Mail\enviarEmail($dataEmail));
+            if ($restaurante && $restaurante->aprobado == 1) {
+                $dataEmail = [
+                    'correo_electronico' => $email,
+                    'titulo' => 'Bienvenido a Check 360 - Acceso Restaurante',
+                    'nombre' => $nombre,
+                    'pass' => $pass,
+                    'plataforma' => 'https://restaurante.check360.cl',
+                    'vista' => 'mails.restaurante_aprobado'
+                ];
+                \Mail::to($email)->send(new \App\Mail\enviarEmail($dataEmail));
+            } else {
+                $dataEmail = [
+                    'correo_electronico' => $email,
+                    'titulo' => 'Registro pendiente de aprobación - Check 360',
+                    'nombre' => $nombre,
+                    'vista' => 'mails.restaurante_registro'
+                ];
+                \Mail::to($email)->send(new \App\Mail\enviarEmail($dataEmail));
+            }
         } catch (\Throwable $e) {
-            \Log::error("Error enviando email: " . $e->getMessage() . " - Line: " . $e->getLine());
+            \Log::error("Error enviando email: " . $e->getMessage());
         }
 
         return response()->json(['estado' => 200]);
@@ -685,7 +744,7 @@ class RestauranteController extends Controller
         // Crear usuario para el restaurante
         $this->crearUsuarioRestaurante($new->id, $adminName, $adminEmail);
 
-        return response()->json(['estado' => 200, 'mensaje' => '¡Restaurante registrado con éxito!']);
+        return response()->json(['estado' => 200, 'mensaje' => '¡Restaurante registrado con éxito! Tu cuenta se encuentra pendiente de aprobación.']);
     }
 
     /**

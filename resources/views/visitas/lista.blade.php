@@ -139,7 +139,8 @@
                     <th scope="col" style="border-top-left-radius: 16px;">Shopper</th>
                     <th scope="col">Restaurante / Dirección</th>
                     <th scope="col">Estado</th>
-                    <th scope="col">Finanzas / Cupón</th>
+                    <th scope="col">Finanzas</th>
+                    <th scope="col">Cupón</th>
                     <th scope="col" style="border-top-right-radius: 16px;">Acciones</th>
                   </tr>
                 </thead>
@@ -466,20 +467,22 @@
                 }
                 toappend += '<td><span class="badge rounded-pill bg-light-' + estadoColor + ' text-' + estadoColor + ' fw-bold px-3">' + estadoNombre + '</span></td>';
 
-                // FINANZAS / CUPON
+                // FINANZAS
                 var total = d.total_consumo ? '$' + Number(d.total_consumo).toLocaleString() : '$0';
                 var desc = d.total_descuento ? '$' + Number(d.total_descuento).toLocaleString() : '$0';
                 var pago = d.total_pagado ? '$' + Number(d.total_pagado).toLocaleString() : '$0';
-                var cupon = d.cupon_codigo ? '<div class="badge bg-light-primary text-primary mt-1">' + d.cupon_codigo + '</div>' : '<small class="text-muted">N/A</small>';
 
                 toappend += '<td>' +
                     '<div style="font-size: 0.75rem;">' +
                         '<div><b>Total:</b> ' + total + '</div>' +
                         '<div><b class="text-danger">Desc:</b> ' + desc + '</div>' +
                         '<div><b class="text-success">Pagado:</b> ' + pago + '</div>' +
-                        cupon +
                     '</div>' +
                 '</td>';
+
+                // CUPÓN
+                var cupon = d.cupon_codigo ? '<div class="badge bg-light-primary text-primary">' + d.cupon_codigo + '</div>' : '<small class="text-muted">N/A</small>';
+                toappend += '<td>' + cupon + '</td>';
 
                 // ACCIONES
                 toappend += '<td><div class="d-flex gap-2">';
