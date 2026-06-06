@@ -81,6 +81,23 @@ class Restaurante extends Model
             return 0;
         }
 
+        // Auto-corrección para evitar discrepancias de zona horaria (UTC vs America/Santiago) en el primer período
+        if ($this->periodo_inicio === $this->plan_inicio) {
+            $primerDia = \Carbon\Carbon::parse($this->periodo_inicio)->subDay()->toDateString();
+            $existeVisitaMismoPeriodo = \App\Models\Visita::where('restaurante_id', $this->id)
+                ->whereIn('estado_id', [1, 2, 3, 4])
+                ->where('fecha_asignacion', $primerDia)
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($existeVisitaMismoPeriodo) {
+                // Actualizar localmente y persistir en BD para futuros cálculos
+                $this->periodo_inicio = $primerDia;
+                $this->plan_inicio = $primerDia;
+                $this->save();
+            }
+        }
+
         return \App\Models\Visita::where('restaurante_id', $this->id)
             ->whereIn('estado_id', [1, 2, 3, 4]) // Pendientes y finalizadas
             ->where('fecha_asignacion', '>=', $this->periodo_inicio)
@@ -98,10 +115,10 @@ class Restaurante extends Model
             return;
         }
 
-        $hoy = \Carbon\Carbon::today();
+        $hoy = \Carbon\Carbon::today('America/Santiago');
 
         // Si el plan general ya expiró (6 meses)
-        if ($this->plan_fin && $hoy->greaterThan(\Carbon\Carbon::parse($this->plan_fin))) {
+        if ($this->plan_fin && $hoy->greaterThan(\Carbon\Carbon::parse($this->plan_fin)->endOfDay())) {
             $this->plan_activo = false;
             $this->save();
             return;

@@ -721,10 +721,10 @@ class RestauranteController extends Controller
         
         // Campos nuevos del plan y auto-registro
         $new->plan_activo = true;
-        $new->plan_inicio = date('Y-m-d');
-        $new->plan_fin = date('Y-m-d', strtotime('+6 months'));
-        $new->periodo_inicio = date('Y-m-d');
-        $new->periodo_fin = date('Y-m-d', strtotime('+60 days'));
+        $new->plan_inicio = \Carbon\Carbon::now('America/Santiago')->toDateString();
+        $new->plan_fin = \Carbon\Carbon::now('America/Santiago')->addMonths(6)->toDateString();
+        $new->periodo_inicio = \Carbon\Carbon::now('America/Santiago')->toDateString();
+        $new->periodo_fin = \Carbon\Carbon::now('America/Santiago')->addDays(60)->toDateString();
         
         $new->porcentaje_descuento = $porcentaje;
         $new->carta_tipo = $cartaTipo;
