@@ -559,16 +559,16 @@
                             <div class="d-flex mb-4">
                                 <div class="timeline-dot bg-secondary me-3" style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;"></div>
                                 <div>
-                                    <small class="text-muted d-block">Registro de Visita</small>
+                                    <small class="text-muted d-block">Visita Agendada (Asignación)</small>
                                     <span class="fw-bold small dark-text-white">{{ $visita->created_at->format('d/m/Y H:i') }} hs</span>
                                 </div>
                             </div>
                             <!-- Cuestionario Inicial -->
                             <div class="d-flex mb-4">
-                                <div class="timeline-dot {{ $tieneRespuestasEntrada ? 'bg-success' : 'bg-warning' }} me-3" style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;"></div>
+                                <div class="timeline-dot {{ $tieneRespuestasEntrada ? 'bg-success' : 'bg-light' }} me-3" style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; border: 2px solid #ddd;"></div>
                                 <div>
                                     <small class="text-muted d-block">Cuestionario Inicial</small>
-                                    <span class="fw-bold small {{ $tieneRespuestasEntrada ? 'text-success' : 'text-warning' }}">{{ $fechaCuestionarioInicio }}</span>
+                                    <span class="fw-bold small {{ $tieneRespuestasEntrada ? 'text-success' : 'text-muted' }}">{{ $fechaCuestionarioInicio }}</span>
                                 </div>
                             </div>
                             <!-- Visita Realizada -->
@@ -576,7 +576,13 @@
                                 <div class="timeline-dot {{ $visita->visitado_at ? 'bg-success' : 'bg-light' }} me-3" style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; border: 2px solid #ddd;"></div>
                                 <div>
                                     <small class="text-muted d-block">Visita al Local</small>
-                                    <span class="fw-bold small {{ $visita->visitado_at ? 'text-success' : 'text-muted' }}">{{ $fechaVisita }}</span>
+                                    <span class="fw-bold small {{ $visita->visitado_at ? 'text-success' : 'text-muted' }}">
+                                        @if($visita->visitado_at)
+                                            {{ \Carbon\Carbon::parse($visita->visitado_at)->format('d/m/Y H:i') }}
+                                        @else
+                                            Pendiente (Programada: {{ \Carbon\Carbon::parse($visita->fecha_asignacion)->format('d/m/Y') }} {{ date('H:i', strtotime($visita->hora_asignacion)) }})
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                             <!-- Cuestionario Final -->

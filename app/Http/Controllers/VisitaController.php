@@ -523,6 +523,14 @@ class VisitaController extends Controller
                 ->with('error', 'Esta visita no está en estado pendiente');
         }
 
+        // Verificar si han pasado más de 24 horas desde la creación de la visita
+        if ($visita->created_at->diffInHours(Carbon::now()) > 24) {
+            $visita->estado_id = 5; // No se realizó
+            $visita->save();
+            return redirect()->route('visitas.ver', encrypt($visita->id))
+                ->with('error', 'El plazo de 24 horas para responder el cuestionario inicial ha expirado. La visita ha sido anulada.');
+        }
+
         // Validar que se puede responder 24 horas antes de la fecha de asignación
         /*
         $fechaAsignacion = Carbon::parse($visita->fecha_asignacion)->startOfDay();
@@ -557,6 +565,13 @@ class VisitaController extends Controller
 
         if (!$visita || $visita->estado_id != 1) {
             return response()->json(['estado' => 500, 'mensaje' => 'Visita no válida o no está en estado pendiente']);
+        }
+
+        // Verificar si han pasado más de 24 horas desde la creación de la visita
+        if ($visita->created_at->diffInHours(Carbon::now()) > 24) {
+            $visita->estado_id = 5; // No se realizó
+            $visita->save();
+            return response()->json(['estado' => 500, 'mensaje' => 'El plazo de 24 horas para responder el cuestionario inicial ha expirado. La visita ha sido anulada.']);
         }
 
         // Si es un shopper, verificar que la visita le pertenece
@@ -768,6 +783,20 @@ class VisitaController extends Controller
             $visita = Visita::with(['shopper', 'restaurante'])->find($visita_id);
             if (!$visita || $visita->estado_id != 2) {
                 return response()->json(['estado' => 500, 'mensaje' => 'Visita no válida o no está en espera de visita']);
+            }
+
+            // Validar límite de 24 horas desde la finalización del cuestionario inicial (entrada)
+            $preSurveyResponse = RespuestaVisita::where('visita_id', $visita->id)
+                ->where('encuesta_tipo', 'entrada')
+                ->first();
+
+            if ($preSurveyResponse) {
+                $horasTranscurridas = $preSurveyResponse->created_at->diffInHours(Carbon::now());
+                if ($horasTranscurridas > 24) {
+                    $visita->estado_id = 5; // No se realizó
+                    $visita->save();
+                    return response()->json(['estado' => 500, 'mensaje' => 'El plazo de 24 horas para realizar la visita desde el cuestionario inicial ha expirado. La visita ha sido marcada como no realizada.']);
+                }
             }
 
             // Si es un shopper, verificar que la visita le pertenece
