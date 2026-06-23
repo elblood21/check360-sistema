@@ -279,6 +279,22 @@
         </div>
     </div>
 
+    <!-- Logos de Colaboradores / Apoyo -->
+    <div class="row mt-4 mb-2">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px; background: white;">
+                <div class="card-body py-3 d-flex flex-column flex-sm-row justify-content-center align-items-center gap-4">
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">Con el apoyo de:</span>
+                    <div class="d-flex align-items-center gap-4">
+                        <img src="{{ asset('assets/images/logo/logo_gedes.jpg') }}" alt="GEDES" style="height: 45px; object-fit: contain; filter: grayscale(20%); transition: all 0.3s ease; border-radius: 4px;" onmouseover="this.style.filter='grayscale(0%)'; this.style.transform='scale(1.05)';" onmouseout="this.style.filter='grayscale(20%)'; this.style.transform='scale(1)';">
+                        <div style="width: 1px; height: 30px; background-color: #dee2e6;"></div>
+                        <img src="{{ asset('assets/images/logo/logo_corfo.jpg') }}" alt="CORFO" style="height: 45px; object-fit: contain; filter: grayscale(20%); transition: all 0.3s ease; border-radius: 4px;" onmouseover="this.style.filter='grayscale(0%)'; this.style.transform='scale(1.05)';" onmouseout="this.style.filter='grayscale(20%)'; this.style.transform='scale(1)';">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @elseif(isset($tipo) && $tipo === 'restaurante')
     <!-- Dashboard Restaurante -->
     
